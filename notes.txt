@@ -1,0 +1,263 @@
+Introduction to One-to-Many Relationships in Object-Oriented Programming
+In object-oriented programming, a one-to-many relationship means that one object (like a teacher) can be associated with many other objects (like students). This is common in real life, such as a university having many departments.
+
+There are several ways to represent these relationships in code:
+
+Association: A simple connection between two objects where neither "owns" the other. For example, a library stores books, but it doesn't own them.
+Aggregation: One object is part of another but can exist independently. For example, a car has wheels, but the wheels can also be used on another car.
+Composition: One object is made up of another and cannot exist without it. For example, a house has rooms, and without the house, the rooms wouldn't exist.
+Let's break down these concepts with examples.
+
+Association
+Association is a weak connection where objects are related but independent. For example, a shopper can have a list of grocery items, but the grocery items don’t need to know who the shopper is.
+
+python
+Copy code
+class GroceryItem:
+    def __init__(self, name, price):
+        self.name = name  # Each GroceryItem has a name.
+        self.price = price  # Each GroceryItem has a price.
+
+class Shopper:
+    def __init__(self, name):
+        self.name = name  # Each Shopper has a name.
+        self.grocery_items = []  # The Shopper can have many grocery items.
+Creating Objects: You create a shopper and some grocery items.
+Adding Items: You add grocery items to the shopper's list.
+Displaying Items: You print out the names and prices of the grocery items in the shopper's list.
+Two-Way One-to-Many Relationship
+In some cases, both objects in the relationship need to know about each other. For example, a teacher has students, and each student needs to know who their teacher is. We can enforce this relationship using Python's @property decorator to ensure only the correct object types are assigned.
+
+python
+Copy code
+class Student:
+
+    all = []  # A list to hold all student objects.
+
+    def __init__(self, name, age):
+        self.name = name  # Each Student has a name.
+        self.age = age  # Each Student has an age.
+        self._teacher = None  # This will hold the Teacher object.
+        Student.all.append(self)  # Add the student to the all list.
+
+    @property
+    def teacher(self):
+        return self._teacher  # Get the student's teacher.
+
+    @teacher.setter
+    def teacher(self, value):
+        if not isinstance(value, Teacher):
+            raise TypeError("Teacher must be an instance of Teacher class")
+        self._teacher = value  # Set the teacher if it's a valid Teacher object.
+
+class Teacher:
+    def __init__(self, name):
+        self.name = name  # Each Teacher has a name.
+
+    def students(self):
+        return [student for student in Student.all if student.teacher == self]
+        # Returns all students who have this teacher.
+
+    def add_student(self, student):
+        if not isinstance(student, Student):
+            raise TypeError("Student must be an instance of Student class")
+        student.teacher = self  # Set the student's teacher to this teacher.
+Single Source of Truth: In this example, the student is the single source of truth for the relationship. Instead of having both objects manage their relationship with each other, the student knows who their teacher is, and the teacher can find all their students by checking this.
+Aggregation
+Aggregation is like association but with a stronger connection. Here, one object (like a car) has another object (like an engine), but they can exist independently.
+
+python
+Copy code
+class Car:
+    def __init__(self, engine):
+        self.engine = engine  # A Car has an Engine, but the Engine exists independently.
+
+class Engine:
+    def __init__(self, cylinders, fuelType):
+        self.cylinders = cylinders  # The Engine has a number of cylinders.
+        self.fuelType = fuelType  # The Engine uses a specific type of fuel.
+
+# Example usage:
+four_cylinder_engine = Engine(4, 'regular')
+acura_tlx = Car(four_cylinder_engine)  # The car has an engine, but the engine can be reused.
+Independence: Even if the car is destroyed, the engine can be reused in another car.
+Composition
+Composition is a strong relationship where one object is part of another, and they depend on each other. For instance, a computer has a CPU, and the CPU is created as part of the computer.
+
+python
+Copy code
+class CPU:
+    def __init__(self, cpu_type):
+        self.cpu_type = cpu_type  # The CPU has a type.
+
+class Computer:
+    def __init__(self, cpu_type):
+        self.CPU = CPU(cpu_type)  # The Computer is composed of a CPU.
+
+# Example usage:
+computer = Computer("Intel i7")  # The CPU is created as part of the computer.
+Dependency: In this case, the CPU cannot exist outside the computer, making them interdependent.
+By understanding these concepts, you can model real-world relationships in your code using object-oriented programming.
+
+Introduction to Many-to-Many Relationships in Object-Oriented Programming
+A many-to-many relationship occurs when multiple instances of one class are associated with multiple instances of another class. For example, multiple users can have access to multiple websites, and each website can be accessed by multiple users.
+
+There are two main ways to implement many-to-many relationships in code:
+
+Without an Intermediary Class: This approach uses lists to store references to related objects. It's simpler but less flexible.
+With an Intermediary Class: This approach introduces a third class that manages the relationship, allowing for more flexibility and the ability to store additional information.
+Many-to-Many Relationship Without an Intermediary Class
+In this approach, each object keeps a list of related objects. For example, a child can have multiple parents, and a parent can have multiple children.
+
+python
+Copy code
+class Parent:
+
+    all = []  # A list to keep track of all Parent objects.
+
+    def __init__(self, name, children=None):
+        self.name = name  # Each Parent has a name.
+        self._children = []  # Each Parent has a list of children.
+        if children:
+            for child in children:
+                self.add_child(child)  # Add each child to the parent's list.
+        Parent.all.append(self)  # Add the parent to the list of all parents.
+
+    def children(self):
+        return self._children  # Return the list of the parent's children.
+
+    def add_child(self, child):
+        if isinstance(child, Child):
+            self._children.append(child)  # Add a Child object to the parent's list.
+        else:
+            raise ValueError("Child must be an instance of the Child class.")
+
+class Child:
+
+    def __init__(self, name):
+        self.name = name  # Each Child has a name.
+
+    def parents(self):
+        return [parent for parent in Parent.all if self in parent.children()]
+        # Return a list of parents who have this child.
+
+    def add_parent(self, parent):
+        if isinstance(parent, Parent):
+            parent.add_child(self)  # Add this child to the parent's list.
+        else:
+            raise ValueError("Parent must be an instance of the Parent class.")
+Creating Objects: You create parents and children.
+Adding Relationships: You can add children to parents and vice versa.
+Accessing Relationships: You can list all children of a parent or all parents of a child.
+This approach is straightforward, but it can become less flexible if you need to store more information about the relationship.
+
+Many-to-Many Relationship With an Intermediary Class
+When more flexibility is needed, you can use an intermediary class. This class sits between the two related classes and can store additional information about the relationship.
+
+For example, let's create a many-to-many relationship between students and courses, using an Enrollment class to manage the relationship.
+
+python
+Copy code
+from datetime import datetime
+
+class Student:
+
+    all = []  # A list to keep track of all Student objects.
+
+    def __init__(self, name):
+        self.name = name  # Each Student has a name.
+        Student.all.append(self)  # Add the student to the list of all students.
+
+    def enroll_in_course(self, course):
+        Enrollment(self, course)  # Create an Enrollment object for the student and course.
+
+    def enrollments(self):
+        return [enrollment for enrollment in Enrollment.all if enrollment.student == self]
+        # Return a list of this student's enrollments.
+
+    def courses(self):
+        return [enrollment.course for enrollment in self.enrollments()]
+        # Return a list of courses this student is enrolled in.
+
+class Course:
+
+    all = []  # A list to keep track of all Course objects.
+
+    def __init__(self, title):
+        self.title = title  # Each Course has a title.
+        Course.all.append(self)  # Add the course to the list of all courses.
+
+    def enrollments(self):
+        return [enrollment for enrollment in Enrollment.all if enrollment.course == self]
+        # Return a list of enrollments for this course.
+
+    def students(self):
+        return [enrollment.student for enrollment in self.enrollments()]
+        # Return a list of students enrolled in this course.
+
+    def enroll_student(self, student):
+        Enrollment(student, self)  # Create an Enrollment object for the student and course.
+
+class Enrollment:
+
+    all = []  # A list to keep track of all Enrollment objects.
+
+    def __init__(self, student, course):
+        self.student = student  # Each Enrollment links to a Student.
+        self.course = course  # Each Enrollment links to a Course.
+        self.enrollment_date = datetime.now()  # Store the date of enrollment.
+        Enrollment.all.append(self)  # Add the enrollment to the list of all enrollments.
+Creating Objects: You create students and courses.
+Adding Relationships: The Enrollment class links students to courses, and you can track when they enrolled.
+Accessing Relationships: You can list all courses a student is enrolled in, or all students in a course, as well as check enrollment dates.
+Using an intermediary class adds complexity but also allows you to easily expand the functionality, such as storing additional details about the relationship (like enrollment dates).
+
+Introduction to Aggregate Methods
+Aggregate methods are powerful tools that allow you to perform calculations and gather information across multiple related objects efficiently. These methods can be particularly useful in scenarios where you need to analyze or summarize data in object-oriented programming.
+
+In this lesson, we'll explore aggregate methods using the Student, Enrollment, and Course classes from a previous many-to-many relationship example. These classes can be found in the ./lib directory, and the code provided below can be used to practice or extend aggregate methods on your own.
+
+Aggregate Methods: Examples
+1. Counting the Number of Courses a Student is Enrolled In
+One of the simplest aggregate methods involves counting the number of courses a student is enrolled in. This method simply counts the number of enrollments a student has.
+
+python
+Copy code
+def course_count(self):
+    return len(self._enrollments)  # Returns the number of courses the student is enrolled in.
+Here, the course_count method returns the total number of courses associated with the student by counting the entries in the _enrollments list.
+
+2. Counting Enrollments Per Day
+A more complex example is counting the number of enrollments that occur on each day. This method is implemented as a class method within the Enrollment class.
+
+python
+Copy code
+@classmethod
+def aggregate_enrollments_per_day(cls):
+    enrollment_count = {}
+    for enrollment in cls.all:
+        date = enrollment.get_enrollment_date().date()
+        enrollment_count[date] = enrollment_count.get(date, 0) + 1
+    return enrollment_count
+Explanation:
+This method iterates through all the enrollment instances.
+For each enrollment, it extracts the enrollment date.
+It then tracks the number of enrollments that occurred on each date using a dictionary, where the date is the key and the count of enrollments on that date is the value.
+3. Calculating the Average Grade for a Student
+Let's assume that the Student class has a grades attribute. This attribute is a dictionary where the keys are enrollments, and the values are grades. We can write a method to calculate the average grade for a student across all courses they are enrolled in.
+
+python
+Copy code
+def aggregate_average_grade(self):
+    # Let's assume the grades are stored in a protected attribute called _grades. 
+    total_grades = sum(self._grades.values())
+    num_courses = len(self._grades)
+    average_grade = total_grades / num_courses
+
+    return average_grade
+Explanation:
+The aggregate_average_grade method calculates the total sum of all grades the student has received.
+It then divides this sum by the number of courses (or enrollments) to compute the average grade.
+Finally, it returns the calculated average grade.
+Summary
+Aggregate methods like these allow you to efficiently gather information and perform calculations across related objects in your program. Whether it's counting the number of courses a student is enrolled in, tracking enrollments per day, or calculating average grades, aggregate methods streamline the process of working with complex data relationships. These techniques are essential for building robust and scalable applications.
