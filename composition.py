@@ -1,4 +1,4 @@
-#without intermediary class
+#with intermediary class
 class Parent:
 
     all = []  # A list to keep track of all Parent objects.
