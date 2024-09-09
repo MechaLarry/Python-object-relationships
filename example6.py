@@ -40,3 +40,4 @@ comp = Compensation(emp, salary, extra_compensation=5000)  # Intermediary linkin
 
 emp.add_compensation(comp)  # Add the compensation to the employee
 print(emp.total_salary())  # Prints: 195000 (Base salary + extra compensation)
+print(f"Employee Name: {emp.name}, Total Salary: {emp.total_salary()}")

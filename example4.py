@@ -13,8 +13,9 @@ class Employee:
      self.obj_salary=salary
 
     def total_salary(self):
-        return self.obj_salary.annual_salary()
+        return self.obj_salary.annual_salary() 
     
 salary=Salary(15000,10000)
 emp=Employee('Jeff', 25, salary)
 print(emp.total_salary())
+print(f"Employee Name: {emp.name}, Total Salary: {emp.total_salary()}")
